@@ -1,0 +1,98 @@
+* { box-sizing: border-box; font-family: Arial, sans-serif; }
+body { margin: 0; background: #f4f4f4; color: #222; }
+
+.topbar {
+  background: #111;
+  color: #fff;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.brand { font-weight: 700; }
+.nav a { color: #fff; text-decoration: none; margin-left: 12px; opacity: 0.9; }
+.nav a:hover { opacity: 1; text-decoration: underline; }
+
+.container { max-width: 1100px; margin: 18px auto; padding: 0 14px; }
+
+.card {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.narrow { max-width: 460px; margin: 0 auto 16px auto; }
+
+h1 { margin: 0 0 10px 0; }
+h2 { margin: 0 0 10px 0; }
+
+label { display:block; margin: 12px 0 6px; font-size: 14px; }
+input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 10px; }
+
+.btn {
+  display: inline-block;
+  background: #111;
+  color: #fff;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-top: 14px;
+  text-decoration: none;
+}
+.btn:hover { opacity: 0.92; }
+
+.links { margin-top: 12px; text-align: center; }
+.links a { color: #111; }
+
+.flash { margin-bottom: 14px; }
+.flash-item {
+  background: #fff3cd;
+  border: 1px solid #ffeeba;
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 8px;
+}
+
+.grid { display: grid; gap: 14px; }
+.two { grid-template-columns: 1fr 1fr; }
+.kpis { grid-template-columns: repeat(3, 1fr); }
+
+.kpi {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 12px;
+}
+.kpi-title { font-size: 13px; color: #666; }
+.kpi-value { font-size: 18px; font-weight: 700; margin-top: 6px; }
+
+.muted { color: #666; }
+
+.table { width: 100%; border-collapse: collapse; }
+.table th, .table td { padding: 8px; border-bottom: 1px solid #eee; text-align: left; font-size: 14px; }
+
+.reco { padding: 10px; border: 1px solid #eee; border-radius: 10px; margin-bottom: 10px; }
+.tag {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  margin-bottom: 6px;
+  background: #eee;
+}
+.tag.stable { background: #e7f7ee; }
+.tag.warning { background: #fff3cd; }
+.tag.critical { background: #f8d7da; }
+
+.footer { text-align: center; padding: 18px; color: #666; }
+
+@media (max-width: 900px) {
+  .two { grid-template-columns: 1fr; }
+  .kpis { grid-template-columns: repeat(2, 1fr); }
+  .nav { display: flex; flex-wrap: wrap; justify-content: flex-end; }
+}
