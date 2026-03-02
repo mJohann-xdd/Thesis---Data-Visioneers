@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{{ title if title else "Thesis App" }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">Financial Forecasting System</div>
+
+    {% if session.get("user_id") %}
+    <nav class="nav">
+      <a href="{{ url_for('dashboard') }}">Dashboard</a>
+      <a href="{{ url_for('visualization') }}">Charts</a>
+      <a href="{{ url_for('upload') }}">Upload</a>
+      <a href="{{ url_for('profile') }}">Profile</a>
+      {% if user and user.role == 'admin' %}
+        <a href="{{ url_for('admin') }}">Admin</a>
+      {% endif %}
+      <a href="{{ url_for('logout') }}">Logout</a>
+    </nav>
+    {% endif %}
+  </header>
+
+  <main class="container">
+    {% with msgs = get_flashed_messages() %}
+      {% if msgs %}
+        <div class="flash">
+          {% for m in msgs %}
+            <div class="flash-item">{{ m }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="footer">Data Visioneers • Wireframe Test</footer>
+</body>
+</html>

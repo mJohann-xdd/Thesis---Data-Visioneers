@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% set title = "Upload CSV" %}
+
+{% block content %}
+<div class="card">
+  <h1>Upload Project Dataset (CSV)</h1>
+  <p class="muted">Required columns: Project Cost, VAT, Payments Made, Percent Accomplished, Balance, Date/Period</p>
+
+  <form method="POST" enctype="multipart/form-data">
+    <input type="file" name="csv_file" accept=".csv" required />
+    <button class="btn" type="submit">UPLOAD & PREPROCESS</button>
+  </form>
+</div>
+{% endblock %}

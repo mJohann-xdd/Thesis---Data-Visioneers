@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% set title = "Visualizations" %}
+
+{% block content %}
+<h1>Data Visualization</h1>
+<p class="muted">This uses the latest uploaded dataset (first 12 rows).</p>
+
+<div class="grid two">
+  <div class="card">
+    <h2>Pie Chart (Totals)</h2>
+    <canvas id="pieChart"></canvas>
+  </div>
+
+  <div class="card">
+    <h2>Line Chart (Balance Trend)</h2>
+    <canvas id="lineChart"></canvas>
+  </div>
+</div>
+
+<script>
+  const dist = {{ dist|tojson }};
+  const periods = {{ periods|tojson }};
+  const balances = {{ balances|tojson }};
+
+  new Chart(document.getElementById("pieChart"), {
+    type: "pie",
+    data: {
+      labels: Object.keys(dist),
+      datasets: [{ data: Object.values(dist) }]
+    }
+  });
+
+  new Chart(document.getElementById("lineChart"), {
+    type: "line",
+    data: {
+      labels: periods,
+      datasets: [{ label: "Balance", data: balances }]
+    }
+  });
+</script>
+{% endblock %}

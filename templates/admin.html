@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% set title = "Admin" %}
+
+{% block content %}
+<h1>Admin Panel</h1>
+
+<div class="grid two">
+  <div class="card">
+    <h2>Manage Users</h2>
+    <table class="table">
+      <tr>
+        <th>Name</th><th>Email</th><th>Role</th><th>Created</th>
+      </tr>
+      {% for u in users %}
+      <tr>
+        <td>{{ u.first_name }} {{ u.last_name }}</td>
+        <td>{{ u.email }}</td>
+        <td>{{ u.role }}</td>
+        <td>{{ u.created_at }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Audit Logs (latest 20)</h2>
+    <table class="table">
+      <tr>
+        <th>Time</th><th>User</th><th>Action</th><th>Status</th>
+      </tr>
+      {% for l in logs %}
+      <tr>
+        <td>{{ l.created_at }}</td>
+        <td>{{ l.email if l.email else "Unknown" }}</td>
+        <td>{{ l.action }}</td>
+        <td>{{ l.status }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+{% endblock %}

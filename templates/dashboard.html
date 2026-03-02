@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% set title = "Dashboard" %}
+
+{% block content %}
+<h1>Dashboard</h1>
+<p class="muted">Hello, {{ user.first_name }}.</p>
+
+{% if not upload %}
+  <div class="card">
+    <h2>No data yet</h2>
+    <p>Upload your CSV to see KPIs, forecasts, and recommendations.</p>
+    <a class="btn" href="{{ url_for('upload') }}">Go to Upload</a>
+  </div>
+{% else %}
+<div class="grid kpis">
+  <div class="kpi"><div class="kpi-title">Project Cost</div><div class="kpi-value">₱ {{ "%.2f"|format(kpis.project_cost) }}</div></div>
+  <div class="kpi"><div class="kpi-title">VAT</div><div class="kpi-value">₱ {{ "%.2f"|format(kpis.vat) }}</div></div>
+  <div class="kpi"><div class="kpi-title">Payments Made</div><div class="kpi-value">₱ {{ "%.2f"|format(kpis.payments_made) }}</div></div>
+  <div class="kpi"><div class="kpi-title">% Accomplished</div><div class="kpi-value">{{ "%.2f"|format(kpis.percent_accomplished) }}%</div></div>
+  <div class="kpi"><div class="kpi-title">Balance</div><div class="kpi-value">₱ {{ "%.2f"|format(kpis.balance) }}</div></div>
+  <div class="kpi"><div class="kpi-title">Date/Period</div><div class="kpi-value">{{ kpis.period }}</div></div>
+</div>
+
+<div class="grid two">
+  <div class="card">
+    <h2>Latest Forecast</h2>
+    <p class="muted">Machine Learning - Multiple Linear Regression, Random Forest, ARIMA</p>
+    <ul>
+      <li>MLR Predicted Balance: <b>{{ preds.mlr if preds.mlr else "N/A" }}</b></li>
+      <li>RF Predicted Balance: <b>{{ preds.rf if preds.rf else "N/A" }}</b></li>
+      <li>ARIMA: <b>{{ preds.arima if preds.arima else "Optional / N/A" }}</b></li>
+    </ul>
+    <a class="btn" href="{{ url_for('visualization') }}">View Charts</a>
+  </div>
+
+  <div class="card">
+    <h2>Recommendations</h2>
+    {% if recos %}
+      {% for r in recos %}
+        <div class="reco">
+          <div class="tag {{ r.risk_level }}">{{ r.risk_level|upper }}</div>
+          <div>{{ r.recommendation_text }}</div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <p>No recommendations yet.</p>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+{% endblock %}

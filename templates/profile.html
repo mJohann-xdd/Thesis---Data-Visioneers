@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% set title = "Profile" %}
+
+{% block content %}
+<div class="card">
+  <h1>User Profile</h1>
+  <p><b>Name:</b> {{ user.first_name }} {{ user.last_name }}</p>
+  <p><b>Email:</b> {{ user.email }}</p>
+  <p><b>Role:</b> {{ user.role }}</p>
+</div>
+
+<div class="card narrow">
+  <h2>Change Password</h2>
+  <form method="POST">
+    <label>Old Password</label>
+    <input type="password" name="old_password" />
+
+    <label>New Password</label>
+    <input type="password" name="new_password" />
+
+    <label>Confirm Password</label>
+    <input type="password" name="confirm_password" />
+
+    <button class="btn" type="submit">SAVE</button>
+  </form>
+</div>
+{% endblock %}
