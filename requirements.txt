@@ -1,5 +1,5 @@
 Flask
-mysql-connector-python0
+mysql-connector-python
 pandas
 python-dotenv
 Werkzeug

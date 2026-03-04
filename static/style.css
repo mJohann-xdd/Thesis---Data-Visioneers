@@ -96,3 +96,6 @@ input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 10px;
   .kpis { grid-template-columns: repeat(2, 1fr); }
   .nav { display: flex; flex-wrap: wrap; justify-content: flex-end; }
 }
+
+.model-block { border-top: 1px solid #eee; padding-top: 10px; margin-top: 10px; }
+.model-block h3 { margin: 6px 0; }

@@ -143,6 +143,30 @@ def dashboard():
     preds = {"mlr": None, "rf": None, "arima": None}
     recos = []
 
+    criteria = {
+        "main_model_used": "RF (preferred)" if preds["rf"] is not None else ("MLR" if preds["mlr"] is not None else "None"),
+        "last_balance": kpis["balance"],
+        "main_pred": preds["rf"] if preds["rf"] is not None else (preds["mlr"] if preds["mlr"] is not None else None),
+        "rules": [
+            "If main predicted balance < current balance → WARNING",
+            "If predicted balance < 0 OR current balance < 0 → CRITICAL",
+            "If ARIMA differs a lot from main prediction → add manual review note"
+        ]
+    }
+
+    # evaluate rule triggers (for showing which rules fired)
+    criteria["triggered"] = []
+    if criteria["main_pred"] is not None:
+        if criteria["main_pred"] < criteria["last_balance"]:
+            criteria["triggered"].append("Main prediction is lower than current balance → WARNING rule triggered")
+
+        if criteria["main_pred"] < 0 or criteria["last_balance"] < 0:
+            criteria["triggered"].append("Negative balance detected → CRITICAL rule triggered")
+
+    if preds["arima"] is not None and criteria["main_pred"] is not None:
+        if abs(preds["arima"] - criteria["main_pred"]) > max(10000, 0.1 * abs(criteria["main_pred"])):
+            criteria["triggered"].append("ARIMA differs strongly from main prediction → manual review note triggered")
+
     if upload:
         cur.execute("SELECT * FROM finance_records WHERE upload_id=%s ORDER BY id DESC LIMIT 1", (upload["id"],))
         row = cur.fetchone()
@@ -165,7 +189,7 @@ def dashboard():
 
     cur.close()
     conn.close()
-    return render_template("dashboard.html", user=user, upload=upload, kpis=kpis, preds=preds, recos=recos)
+    return render_template("dashboard.html", user=user, upload=upload, kpis=kpis, preds=preds, recos=recos, criteria=criteria)
 
 @app.route("/profile", methods=["GET", "POST"])
 def profile():
@@ -399,6 +423,34 @@ def upload():
                     (upload_id, arima_pred, "ARIMA next-step forecast (time series support)")
                 )
 
+            # ---------- SIMPLE PRESCRIPTIVE RECOMMENDATIONS ----------
+            last_balance = float(df["Balance"].iloc[-1])
+
+            # Choose a "main" predicted value: prefer RF, then MLR, else last balance
+            main_pred = rf_pred if rf_pred is not None else (mlr_pred if mlr_pred is not None else last_balance)
+
+            risk = "stable"
+            rec_text = "Balance looks stable. Continue monitoring."
+
+            # Example thresholds (student-friendly)
+            if main_pred < last_balance:
+                risk = "warning"
+                rec_text = "Forecast shows a possible decrease in balance. Review expenses and payment schedule."
+
+            if main_pred < 0 or last_balance < 0:
+                risk = "critical"
+                rec_text = "Balance is negative or forecasted to be negative. Immediate budget review and cost control recommended."
+
+            # If ARIMA disagrees strongly, add note
+            if arima_pred is not None and abs(arima_pred - main_pred) > max(10000, 0.1 * abs(main_pred)):
+                rec_text += " ARIMA trend check shows a different direction—consider manual review."
+
+            cur.execute("DELETE FROM recommendations WHERE upload_id=%s", (upload_id,))
+            cur.execute(
+                "INSERT INTO recommendations (upload_id, risk_level, recommendation_text) VALUES (%s,%s,%s)",
+                (upload_id, risk, rec_text)
+            )
+
             cur.execute("INSERT INTO predictions (upload_id, model_name, predicted_balance, note) VALUES (%s,'mlr',%s,'Simple demo')", (upload_id, mlr_pred))
             cur.execute("INSERT INTO predictions (upload_id, model_name, predicted_balance, note) VALUES (%s,'rf',%s,'Simple demo')", (upload_id, rf_pred))
 
@@ -440,6 +492,30 @@ def visualization():
 
     periods, balances = [], []
     dist = {"Project Cost": 0, "VAT": 0, "Payments Made": 0}
+
+    # --- simple insights (student-friendly) ---
+    insights = []
+
+    if len(balances) >= 2:
+        start_b = balances[0]
+        end_b = balances[-1]
+        change = end_b - start_b
+        pct_change = (change / start_b * 100) if start_b != 0 else 0
+
+        trend = "increasing" if change > 0 else ("decreasing" if change < 0 else "stable")
+        insights.append(f"Balance trend is {trend} from the first period to the last period.")
+
+        insights.append(f"Overall change: {change:,.2f} ({pct_change:.1f}%).")
+
+    if len(balances) >= 1:
+        insights.append(f"Highest balance: {max(balances):,.2f}. Lowest balance: {min(balances):,.2f}.")
+
+    # distribution insight
+    total_dist = sum(dist.values())
+    if total_dist > 0:
+        biggest_key = max(dist, key=dist.get)
+        biggest_pct = dist[biggest_key] / total_dist * 100
+        insights.append(f"Biggest share in the pie chart is {biggest_key} ({biggest_pct:.1f}%).")
 
     if upload:
         cur.execute("SELECT period, project_cost, vat, payments_made, balance FROM finance_records WHERE upload_id=%s ORDER BY id ASC LIMIT 12", (upload["id"],))

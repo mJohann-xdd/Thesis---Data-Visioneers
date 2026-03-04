@@ -59,3 +59,18 @@ CREATE TABLE IF NOT EXISTS audit_logs (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id)
 );
+
+UPDATE users
+SET role = 'admin'
+WHERE email = 'admin@example.com';
+
+SET FOREIGN_KEY_CHECKS = 0;
+
+TRUNCATE TABLE audit_logs;
+TRUNCATE TABLE recommendations;
+TRUNCATE TABLE predictions;
+TRUNCATE TABLE finance_records;
+TRUNCATE TABLE uploads;
+TRUNCATE TABLE users;
+
+SET FOREIGN_KEY_CHECKS = 1;

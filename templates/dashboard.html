@@ -23,15 +23,40 @@
 
 <div class="grid two">
   <div class="card">
-    <h2>Latest Forecast</h2>
-    <p class="muted">Machine Learning - Multiple Linear Regression, Random Forest, ARIMA</p>
-    <ul>
-      <li>MLR Predicted Balance: <b>{{ preds.mlr if preds.mlr else "N/A" }}</b></li>
-      <li>RF Predicted Balance: <b>{{ preds.rf if preds.rf else "N/A" }}</b></li>
-      <li>ARIMA: <b>{{ preds.arima if preds.arima else "Optional / N/A" }}</b></li>
-    </ul>
-    <a class="btn" href="{{ url_for('visualization') }}">View Charts</a>
+  <h2>Forecast Results (What do these mean?)</h2>
+  <p class="muted">
+    These are estimates of your <b>Balance</b> based on your uploaded data.
+    Higher balance usually means you still have more budget remaining.
+  </p>
+
+  <div class="model-block">
+    <h3>Multiple Linear Regression (MLR)</h3>
+    <p class="muted">
+      Uses a straight-line relationship between inputs (Cost, VAT, Payments, % Accomplished) and Balance.
+      Good for simple, explainable forecasting.
+    </p>
+    <p><b>Predicted Balance:</b> {{ preds.mlr if preds.mlr else "N/A" }}</p>
   </div>
+
+  <div class="model-block">
+    <h3>Random Forest (RF)</h3>
+    <p class="muted">
+      Uses many decision trees and averages them. Handles more complex patterns than MLR.
+    </p>
+    <p><b>Predicted Balance:</b> {{ preds.rf if preds.rf else "N/A" }}</p>
+  </div>
+
+  <div class="model-block">
+    <h3>ARIMA (Time Trend Support)</h3>
+    <p class="muted">
+      Uses your Balance over time to forecast the next period trend (time-series).
+      This is a supporting check for direction.
+    </p>
+    <p><b>Next-Period Forecasted Balance:</b> {{ preds.arima if preds.arima else "Optional / N/A" }}</p>
+  </div>
+
+  <a class="btn" href="{{ url_for('visualization') }}">View Charts</a>
+</div>
 
   <div class="card">
     <h2>Recommendations</h2>
@@ -44,6 +69,41 @@
       {% endfor %}
     {% else %}
       <p>No recommendations yet.</p>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <h2>How Recommendations Are Decided</h2>
+
+    {% if criteria is defined and criteria %}
+      <p><b>Main model used:</b> {{ criteria["main_model_used"] }}</p>
+      <p><b>Current Balance:</b> {{ "%.2f"|format(criteria["last_balance"]) }}</p>
+
+      {% if criteria["main_pred"] is not none %}
+        <p><b>Main Predicted Balance:</b> {{ "%.2f"|format(criteria["main_pred"]) }}</p>
+      {% else %}
+        <p><b>Main Predicted Balance:</b> N/A</p>
+      {% endif %}
+
+      <h3>Rules (Criteria)</h3>
+      <ul>
+        {% for r in criteria["rules"] %}
+          <li>{{ r }}</li>
+        {% endfor %}
+      </ul>
+
+      <h3>What triggered today?</h3>
+      {% if criteria["triggered"] and (criteria["triggered"]|length > 0) %}
+        <ul>
+          {% for t in criteria["triggered"] %}
+            <li>{{ t }}</li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="muted">No rules triggered. System is stable.</p>
+      {% endif %}
+    {% else %}
+      <p class="muted">Criteria not available yet. Upload a dataset first.</p>
     {% endif %}
   </div>
 </div>

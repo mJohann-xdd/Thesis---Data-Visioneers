@@ -5,6 +5,19 @@
 <h1>Data Visualization</h1>
 <p class="muted">This uses the latest uploaded dataset (first 12 rows).</p>
 
+<div class="card">
+  <h2>Quick Insights</h2>
+  {% if insights and insights|length > 0 %}
+    <ul>
+      {% for i in insights %}
+        <li>{{ i }}</li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No insights yet. Upload data first.</p>
+  {% endif %}
+</div>
+
 <div class="grid two">
   <div class="card">
     <h2>Pie Chart (Totals)</h2>
