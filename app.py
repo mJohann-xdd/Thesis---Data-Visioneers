@@ -513,6 +513,18 @@ def visualization():
     periods, balances = [], []
     dist = {"Project Cost": 0, "VAT": 0, "Payments Made": 0}
 
+    if upload:
+        cur.execute("SELECT period, project_cost, vat, payments_made, balance FROM finance_records WHERE upload_id=%s ORDER BY id ASC LIMIT 12", (upload["id"],))
+        rows = cur.fetchall()
+        for r in rows:
+            periods.append(r["period"])
+            balances.append(float(r["balance"]))
+            dist["Project Cost"] += float(r["project_cost"])
+            dist["VAT"] += float(r["vat"])
+            dist["Payments Made"] += float(r["payments_made"])
+
+    cur.close(); conn.close()
+
     # --- simple insights (student-friendly) ---
     insights = []
 
@@ -536,19 +548,7 @@ def visualization():
         biggest_key = max(dist, key=dist.get)
         biggest_pct = dist[biggest_key] / total_dist * 100
         insights.append(f"Biggest share in the pie chart is {biggest_key} ({biggest_pct:.1f}%).")
-
-    if upload:
-        cur.execute("SELECT period, project_cost, vat, payments_made, balance FROM finance_records WHERE upload_id=%s ORDER BY id ASC LIMIT 12", (upload["id"],))
-        rows = cur.fetchall()
-        for r in rows:
-            periods.append(r["period"])
-            balances.append(float(r["balance"]))
-            dist["Project Cost"] += float(r["project_cost"])
-            dist["VAT"] += float(r["vat"])
-            dist["Payments Made"] += float(r["payments_made"])
-
-    cur.close(); conn.close()
-    return render_template("visualization.html", user=user, periods=periods, balances=balances, dist=dist)
+    return render_template("visualization.html", user=user, periods=periods, balances=balances,  dist=dist, insights=insights)
 
 @app.route("/admin")
 def admin():
