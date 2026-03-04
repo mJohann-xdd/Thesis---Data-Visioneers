@@ -143,30 +143,6 @@ def dashboard():
     preds = {"mlr": None, "rf": None, "arima": None}
     recos = []
 
-    criteria = {
-        "main_model_used": "RF (preferred)" if preds["rf"] is not None else ("MLR" if preds["mlr"] is not None else "None"),
-        "last_balance": kpis["balance"],
-        "main_pred": preds["rf"] if preds["rf"] is not None else (preds["mlr"] if preds["mlr"] is not None else None),
-        "rules": [
-            "If main predicted balance < current balance → WARNING",
-            "If predicted balance < 0 OR current balance < 0 → CRITICAL",
-            "If ARIMA differs a lot from main prediction → add manual review note"
-        ]
-    }
-
-    # evaluate rule triggers (for showing which rules fired)
-    criteria["triggered"] = []
-    if criteria["main_pred"] is not None:
-        if criteria["main_pred"] < criteria["last_balance"]:
-            criteria["triggered"].append("Main prediction is lower than current balance → WARNING rule triggered")
-
-        if criteria["main_pred"] < 0 or criteria["last_balance"] < 0:
-            criteria["triggered"].append("Negative balance detected → CRITICAL rule triggered")
-
-    if preds["arima"] is not None and criteria["main_pred"] is not None:
-        if abs(preds["arima"] - criteria["main_pred"]) > max(10000, 0.1 * abs(criteria["main_pred"])):
-            criteria["triggered"].append("ARIMA differs strongly from main prediction → manual review note triggered")
-
     if upload:
         cur.execute("SELECT * FROM finance_records WHERE upload_id=%s ORDER BY id DESC LIMIT 1", (upload["id"],))
         row = cur.fetchone()
@@ -189,6 +165,50 @@ def dashboard():
 
     cur.close()
     conn.close()
+
+    # Transparent criteria (safe even if no upload/preds)
+    criteria = {
+        "main_model_used": "None",
+        "last_balance": kpis["balance"],
+        "main_pred": None,
+        "rules": [
+            "If main predicted balance < current balance → WARNING",
+            "If predicted balance < 0 OR current balance < 0 → CRITICAL",
+            "If ARIMA differs a lot from main prediction → add manual review note",
+        ],
+        "triggered": [],
+    }
+
+    # Choose main predicted value (prefer RF, then MLR)
+    main_pred = preds.get("rf")
+    if main_pred is not None:
+        criteria["main_model_used"] = "RF (preferred)"
+        criteria["main_pred"] = main_pred
+    else:
+        main_pred = preds.get("mlr")
+        if main_pred is not None:
+            criteria["main_model_used"] = "MLR"
+            criteria["main_pred"] = main_pred
+
+    # Apply rules and record what triggered
+    if criteria["main_pred"] is not None:
+        if criteria["main_pred"] < criteria["last_balance"]:
+            criteria["triggered"].append(
+                "Main prediction is lower than current balance → WARNING rule triggered"
+            )
+
+        if criteria["main_pred"] < 0 or criteria["last_balance"] < 0:
+            criteria["triggered"].append(
+                "Negative balance detected → CRITICAL rule triggered"
+            )
+
+    # ARIMA disagreement rule
+    if preds.get("arima") is not None and criteria["main_pred"] is not None:
+        if abs(preds["arima"] - criteria["main_pred"]) > max(10000, 0.1 * abs(criteria["main_pred"])):
+            criteria["triggered"].append(
+                "ARIMA differs strongly from main prediction → manual review note triggered"
+            )
+
     return render_template("dashboard.html", user=user, upload=upload, kpis=kpis, preds=preds, recos=recos, criteria=criteria)
 
 @app.route("/profile", methods=["GET", "POST"])

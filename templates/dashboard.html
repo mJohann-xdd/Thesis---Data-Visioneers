@@ -23,10 +23,10 @@
 
 <div class="grid two">
   <div class="card">
-  <h2>Forecast Results (What do these mean?)</h2>
+  <h2>Forecast Results</h2>
   <p class="muted">
-    These are estimates of your <b>Balance</b> based on your uploaded data.
-    Higher balance usually means you still have more budget remaining.
+    These are estimates of <b>Balance</b> based on the uploaded data.
+    Higher balance usually means there are still more budget remaining.
   </p>
 
   <div class="model-block">
@@ -49,7 +49,7 @@
   <div class="model-block">
     <h3>ARIMA (Time Trend Support)</h3>
     <p class="muted">
-      Uses your Balance over time to forecast the next period trend (time-series).
+      Uses Balance over time to forecast the next period trend (time-series).
       This is a supporting check for direction.
     </p>
     <p><b>Next-Period Forecasted Balance:</b> {{ preds.arima if preds.arima else "Optional / N/A" }}</p>
