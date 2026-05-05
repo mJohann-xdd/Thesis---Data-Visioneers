@@ -1,0 +1,191 @@
+================================================================================
+DATA VISIONEERS - QUICK START GUIDE
+================================================================================
+
+FASTEST WAY TO GET RUNNING (5 MINUTES)
+================================================================================
+
+1. INSTALL PYTHON & MYSQL
+   - Download Python 3.8+: https://www.python.org/downloads/
+   - Download MySQL: https://dev.mysql.com/downloads/mysql/
+   - Install both and remember your MySQL root password
+
+2. OPEN TERMINAL/COMMAND PROMPT
+
+3. NAVIGATE TO PROJECT FOLDER
+   cd path/to/Enhanced-Data-Visioneers-Complete
+
+4. CREATE VIRTUAL ENVIRONMENT
+   
+   Windows:
+   python -m venv venv
+   venv\Scripts\activate
+   
+   Mac/Linux:
+   python3 -m venv venv
+   source venv/bin/activate
+
+5. INSTALL DEPENDENCIES
+   pip install -r requirements.txt
+
+6. SET UP DATABASE
+   
+   a) Open new terminal and connect to MySQL:
+      mysql -u root -p
+      (Enter your MySQL password)
+   
+   b) Copy and paste this entire block:
+   
+   CREATE DATABASE IF NOT EXISTS thesis_finance;
+   USE thesis_finance;
+   
+   CREATE TABLE IF NOT EXISTS users (
+     id INT AUTO_INCREMENT PRIMARY KEY,
+     first_name VARCHAR(80) NOT NULL,
+     last_name VARCHAR(80) NOT NULL,
+     email VARCHAR(120) NOT NULL UNIQUE,
+     password_hash VARCHAR(255) NOT NULL,
+     role ENUM('admin','user') NOT NULL DEFAULT 'user',
+     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+   );
+   
+   CREATE TABLE IF NOT EXISTS projects (
+     id INT AUTO_INCREMENT PRIMARY KEY,
+     user_id INT NOT NULL,
+     project_name VARCHAR(255) NOT NULL,
+     project_description TEXT,
+     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+     FOREIGN KEY (user_id) REFERENCES users(id)
+   );
+   
+   CREATE TABLE IF NOT EXISTS uploads (
+     id INT AUTO_INCREMENT PRIMARY KEY,
+     project_id INT NOT NULL,
+     user_id INT NOT NULL,
+     filename VARCHAR(255) NOT NULL,
+     uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+     FOREIGN KEY (project_id) REFERENCES projects(id),
+     FOREIGN KEY (user_id) REFERENCES users(id)
+   );
+   
+   CREATE TABLE IF NOT EXISTS finance_records (
+     id INT AUTO_INCREMENT PRIMARY KEY,
+     upload_id INT NOT NULL,
+     period VARCHAR(50) NOT NULL,
+     project_cost DECIMAL(14,2) NOT NULL,
+     vat DECIMAL(14,2) NOT NULL,
+     payments_made DECIMAL(14,2) NOT NULL,
+     percent_accomplished DECIMAL(6,2) NOT NULL,
+     balance DECIMAL(14,2) NOT NULL,
+     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+     FOREIGN KEY (upload_id) REFERENCES uploads(id)
+   );
+   
+   CREATE TABLE IF NOT EXISTS predictions (
+     id INT AUTO_INCREMENT PRIMARY KEY,
+     upload_id INT NOT NULL,
+     model_name ENUM('mlr','rf','arima') NOT NULL,
+     predicted_balance DECIMAL(14,2) NOT NULL,
+     mae DECIMAL(14,4),
+     rmse DECIMAL(14,4),
+     note VARCHAR(255),
+     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+     FOREIGN KEY (upload_id) REFERENCES uploads(id)
+   );
+   
+   CREATE TABLE IF NOT EXISTS recommendations (
+     id INT AUTO_INCREMENT PRIMARY KEY,
+     upload_id INT NOT NULL,
+     risk_level ENUM('stable','warning','critical') NOT NULL,
+     recommendation_text TEXT NOT NULL,
+     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+     FOREIGN KEY (upload_id) REFERENCES uploads(id)
+   );
+   
+   CREATE TABLE IF NOT EXISTS audit_logs (
+     id INT AUTO_INCREMENT PRIMARY KEY,
+     user_id INT,
+     action VARCHAR(255) NOT NULL,
+     status VARCHAR(50) NOT NULL,
+     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+     FOREIGN KEY (user_id) REFERENCES users(id)
+   );
+   
+   c) Type: exit
+
+7. UPDATE .env FILE (IF NEEDED)
+   
+   Open .env file in a text editor:
+   
+   If your MySQL has a password, change this line:
+   DB_PASSWORD=
+   
+   To:
+   DB_PASSWORD=your_mysql_password
+   
+   Save and close.
+
+8. RUN THE APPLICATION
+   
+   In your terminal (with venv activated):
+   python app_enhanced.py
+   
+   You should see:
+   * Running on http://127.0.0.1:5000
+
+9. OPEN IN BROWSER
+   
+   Go to: http://localhost:5000
+
+10. CREATE ACCOUNT & TEST
+    
+    a) Click "Register"
+    b) Fill in your details
+    c) Click "Create Account"
+    d) Login with your credentials
+    e) Click "New Project"
+    f) Enter project name and click "Create Project"
+    g) Click "Upload Data"
+    h) Use the included "sample_data.csv" file
+    i) Click "Upload & Process"
+    j) View results on the dashboard!
+
+================================================================================
+THAT'S IT! YOU'RE RUNNING DATA VISIONEERS!
+================================================================================
+
+FEATURES YOU CAN NOW USE:
+✓ Create multiple projects
+✓ Upload financial data (CSV)
+✓ View KPIs (Key Performance Indicators)
+✓ See ML predictions (MLR, Random Forest, ARIMA)
+✓ Check accuracy metrics (MAE, RMSE)
+✓ Read prescriptive recommendations
+✓ Analyze trends with interactive charts
+✓ Export and compare projects
+
+SAMPLE DATA:
+The file "sample_data.csv" is included for testing. Use it to see how the
+system works before uploading your own data.
+
+CSV FORMAT REQUIRED:
+Your CSV must have these columns (exact names):
+- Project Cost
+- VAT
+- Payments Made
+- Percent Accomplished
+- Balance
+- Date/Period
+
+NEED HELP?
+Read "SETUP_INSTRUCTIONS.md" for detailed step-by-step guide.
+Read "README_ENHANCED.md" for full documentation.
+
+TROUBLESHOOTING:
+- Can't connect to MySQL? Check that MySQL is running and password is correct in .env
+- ModuleNotFoundError? Make sure venv is activated (you should see (venv) in terminal)
+- Port 5000 already in use? Change port in app_enhanced.py last line
+
+================================================================================
+HAPPY FORECASTING! 📊
+================================================================================

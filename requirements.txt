@@ -6,3 +6,9 @@ Werkzeug
 numpy
 statsmodels
 scikit-learn
+Flask-Talisman
+Flask-SeaSurf
+Flask-Limiter
+gunicorn
+whitenoise
+psycopg2-binary
